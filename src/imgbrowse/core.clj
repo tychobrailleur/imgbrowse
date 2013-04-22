@@ -5,7 +5,7 @@
 
 (native!)
 
-(def the-image "C:/tmp/imgbrowse/toothpicks.jpg")
+(def the-image "./toothpicks.jpg")
 
 (defn read-image-file [img]
   (javax.imageio.ImageIO/read (File. img)))
