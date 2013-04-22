@@ -16,7 +16,9 @@
   [dir]
   (filter picture? (file-seq (File. dir))))
 
-(def the-image (.getAbsolutePath (rand-nth (list-images (System/getProperty "user.home")))))
+(def the-images (list-images (System/getProperty "user.home")))
+(def the-image (atom (.getAbsolutePath (rand-nth the-images))))
+(defn update-image [image] (.getAbsolutePath (rand-nth the-images)))
 
 (defn read-image-file 
   "Reads an image from a file and returns a BufferedImage."
@@ -38,11 +40,13 @@
     :id :imagepanel
     :border 2
     :center (canvas :id :image
-                    :paint #(draw-image %1 %2 the-image (.getWidth %1) (.getHeight %1)))))
+                    :paint #(draw-image %1 %2 @the-image (.getWidth %1) (.getHeight %1)))))
 
 (defn add-behaviour [f]
   (let [c (select f [:#image])]
-    (listen c :mouse-clicked (fn [e] (repaint! c))))
+    (listen c :mouse-clicked (fn [e] (repaint! c)))
+    (listen f :key-pressed (fn [e] (swap! the-image update-image) 
+                               (repaint! c))))
  f)
 
 (defn -main [& args]
