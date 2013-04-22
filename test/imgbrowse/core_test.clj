@@ -1,0 +1,7 @@
+(ns imgbrowse.core-test
+  (:use clojure.test
+        imgbrowse.core))
+
+(deftest a-test
+  (testing "FIXME, I fail."
+    (is (= 0 1))))
