@@ -5,9 +5,22 @@
 
 (native!)
 
-(def the-image "./toothpicks.jpg")
+(defn picture? [file]
+  (let [filename (.toUpperCase (.getName file))]
+    (or (.endsWith filename "JPG")
+        (.endsWith filename "PNG")
+        (.endsWith filename "GIF"))))
 
-(defn read-image-file [img]
+(defn list-images
+  "Lists all the images in a folder."
+  [dir]
+  (filter picture? (file-seq (File. dir))))
+
+(def the-image (.getAbsolutePath (rand-nth (list-images (System/getProperty "user.home")))))
+
+(defn read-image-file 
+  "Reads an image from a file and returns a BufferedImage."
+  [img]
   (javax.imageio.ImageIO/read (File. img)))
 
 (defn draw-image [c g img x y]
