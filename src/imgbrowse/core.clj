@@ -16,23 +16,26 @@
   [dir]
   (filter picture? (file-seq (File. dir))))
 
-(def the-images (list-images (System/getProperty "user.home")))
-(def the-image (atom (.getAbsolutePath (rand-nth the-images))))
-(defn update-image [image] (.getAbsolutePath (rand-nth the-images)))
+;; the-images store the list of images to be displayed.
+(def the-images (atom ()))
+;; the-image is the currently displayed image.
+(def the-image (atom ""))
+
+(defn update-image [image] (.getAbsolutePath (rand-nth @the-images)))
 
 (defn read-image-file 
   "Reads an image from a file and returns a BufferedImage."
   [img]
   (javax.imageio.ImageIO/read (File. img)))
 
-(defn draw-image [c g img x y]
+(defn draw-image [c g img frame_width frame_height]
   (let [image (read-image-file img)
         image_width (.getWidth image nil)
         image_height (.getHeight image nil)
-        image_x (if (>= image_width x) 0 (/ (- x image_width) 2))
-        image_y (if (>= image_height y) 0 (/ (- y image_height) 2))
-        width (if (>= image_width x) x image_width)
-        height (if (>= image_height y) y image_height)]
+        image_x (if (>= image_width frame_width) 0 (/ (- frame_width image_width) 2))
+        image_y (if (>= image_height frame_height) 0 (/ (- frame_height image_height) 2))
+        width (if (>= image_width frame_width) frame_width image_width)
+        height (if (>= image_height frame_height) frame_height image_height)]
   (.drawImage g image image_x image_y width height nil)))
 
 (defn image-panel []
@@ -50,6 +53,8 @@
  f)
 
 (defn -main [& args]
+  (swap! the-images (fn [_ args] (list-images (first args))) args)
+  (swap! the-image update-image)
   (invoke-later
     (->
       (frame
