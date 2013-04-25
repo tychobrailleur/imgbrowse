@@ -60,6 +60,7 @@
     (listen f :key-pressed (fn [e] (let [key-pressed (.getKeyCode e)] (cond
                                                                        (= key-pressed (KeyEvent/VK_F)) (display-fullscreen f)
                                                                        (= key-pressed (KeyEvent/VK_P)) (copy-path-to-clipboard)
+                                                                       (and (= key-pressed (KeyEvent/VK_Q)) (bit-and (.getModifiers e) (KeyEvent/CTRL_MASK))) (System/exit 0)
                                                                        :else (swap! the-image update-image)
                                                                        )
                                         (repaint! c)))))
