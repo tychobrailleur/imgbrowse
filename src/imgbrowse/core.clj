@@ -63,7 +63,7 @@
                                                                        (= key-pressed (KeyEvent/VK_F)) (display-fullscreen f)
                                                                        (= key-pressed (KeyEvent/VK_P)) (copy-path-to-clipboard)
                                                                        (and (= key-pressed (KeyEvent/VK_Q)) (bit-and (.getModifiers e) (KeyEvent/CTRL_MASK))) (System/exit 0)
-                                                                       :else (swap! the-image update-image))
+                                                                       (or (= key-pressed (KeyEvent/VK_N)) (= key-pressed (KeyEvent/VK_RIGHT)) (= key-pressed (KeyEvent/VK_SPACE))) (do (swap! the-image update-image)(.setTitle f (str "ImgBrowse – " @the-image))))
                                         (repaint! c)))))
  f)
 
@@ -73,7 +73,7 @@
   (invoke-later
     (->
       (frame
-        :title "ImgBrowse"
+        :title (str "ImgBrowse – " @the-image)
         :size  [600 :by 800]
         :on-close :exit
         :content (image-panel))
