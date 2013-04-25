@@ -1,6 +1,6 @@
 (ns imgbrowse.core
      (:use seesaw.core seesaw.graphics)
-     (:import java.io.File java.awt.event.KeyEvent java.awt.Toolkit)
+     (:import java.io.File java.awt.event.KeyEvent java.awt.Toolkit java.awt.datatransfer.StringSelection)
   (:gen-class))
 
 (native!)
@@ -49,11 +49,17 @@
   (let [screen-size (.getScreenSize (Toolkit/getDefaultToolkit))]
   (.setSize f screen-size)))
 
+(defn copy-path-to-clipboard []
+  (let [selection (StringSelection. @the-image)
+        clipboard (.getSystemClipboard (Toolkit/getDefaultToolkit))]
+        (.setContents clipboard selection nil)))
+
 (defn add-behaviour [f]
   (let [c (select f [:#image])]
     (listen c :mouse-clicked (fn [e] (repaint! c)))
     (listen f :key-pressed (fn [e] (let [key-pressed (.getKeyCode e)] (cond
                                                                        (= key-pressed (KeyEvent/VK_F)) (display-fullscreen f)
+                                                                       (= key-pressed (KeyEvent/VK_P)) (copy-path-to-clipboard)
                                                                        :else (swap! the-image update-image)
                                                                        )
                                         (repaint! c)))))
