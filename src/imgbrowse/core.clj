@@ -1,6 +1,6 @@
 (ns imgbrowse.core
      (:use seesaw.core seesaw.graphics)
-     (:import org.pushingpixels.substance.api.SubstanceLookAndFeel java.io.File)
+     (:import java.io.File java.awt.event.KeyEvent java.awt.Toolkit)
   (:gen-class))
 
 (native!)
@@ -23,7 +23,7 @@
 
 (defn update-image [image] (.getAbsolutePath (rand-nth @the-images)))
 
-(defn read-image-file 
+(defn read-image-file
   "Reads an image from a file and returns a BufferedImage."
   [img]
   (javax.imageio.ImageIO/read (File. img)))
@@ -39,17 +39,24 @@
   (.drawImage g image image_x image_y width height nil)))
 
 (defn image-panel []
-  (border-panel 
+  (border-panel
     :id :imagepanel
     :border 2
     :center (canvas :id :image
                     :paint #(draw-image %1 %2 @the-image (.getWidth %1) (.getHeight %1)))))
 
+(defn display-fullscreen [f]
+  (let [screen-size (.getScreenSize (Toolkit/getDefaultToolkit))]
+  (.setSize f screen-size)))
+
 (defn add-behaviour [f]
   (let [c (select f [:#image])]
     (listen c :mouse-clicked (fn [e] (repaint! c)))
-    (listen f :key-pressed (fn [e] (swap! the-image update-image) 
-                               (repaint! c))))
+    (listen f :key-pressed (fn [e] (let [key-pressed (.getKeyCode e)] (cond
+                                                                       (= key-pressed (KeyEvent/VK_F)) (display-fullscreen f)
+                                                                       :else (swap! the-image update-image)
+                                                                       )
+                                        (repaint! c)))))
  f)
 
 (defn -main [& args]
