@@ -1,6 +1,6 @@
 (ns imgbrowse.core
      (:use seesaw.core seesaw.graphics)
-     (:import java.io.File java.awt.event.KeyEvent java.awt.Toolkit java.awt.datatransfer.StringSelection)
+     (:import java.io.File java.awt.event.KeyEvent java.awt.Toolkit java.awt.datatransfer.StringSelection java.awt.RenderingHints)
   (:gen-class))
 
 (native!)
@@ -32,10 +32,12 @@
   (let [image (read-image-file img)
         image_width (.getWidth image nil)
         image_height (.getHeight image nil)
-        image_x (if (>= image_width frame_width) 0 (/ (- frame_width image_width) 2))
-        image_y (if (>= image_height frame_height) 0 (/ (- frame_height image_height) 2))
-        width (if (>= image_width frame_width) frame_width image_width)
-        height (if (>= image_height frame_height) frame_height image_height)]
+        ratio (float (/ image_width image_height))
+        width (if (>= frame_width frame_height) (* frame_height ratio) frame_width)
+        height (if (> frame_height frame_width) (/ frame_width ratio) frame_height)
+        image_x (if (>= width frame_width) 0 (/ (- frame_width width) 2))
+        image_y (if (>= height frame_height) 0 (/ (- frame_height height) 2))]
+  (.setRenderingHint g (RenderingHints/KEY_INTERPOLATION) (RenderingHints/VALUE_INTERPOLATION_BILINEAR))
   (.drawImage g image image_x image_y width height nil)))
 
 (defn image-panel []
@@ -56,13 +58,12 @@
 
 (defn add-behaviour [f]
   (let [c (select f [:#image])]
-    (listen c :mouse-clicked (fn [e] (repaint! c)))
+       (listen c :mouse-clicked (fn [e] (repaint! c)))
     (listen f :key-pressed (fn [e] (let [key-pressed (.getKeyCode e)] (cond
                                                                        (= key-pressed (KeyEvent/VK_F)) (display-fullscreen f)
                                                                        (= key-pressed (KeyEvent/VK_P)) (copy-path-to-clipboard)
                                                                        (and (= key-pressed (KeyEvent/VK_Q)) (bit-and (.getModifiers e) (KeyEvent/CTRL_MASK))) (System/exit 0)
-                                                                       :else (swap! the-image update-image)
-                                                                       )
+                                                                       :else (swap! the-image update-image))
                                         (repaint! c)))))
  f)
 
