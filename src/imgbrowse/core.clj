@@ -56,14 +56,21 @@
         clipboard (.getSystemClipboard (Toolkit/getDefaultToolkit))]
         (.setContents clipboard selection nil)))
 
+(defn open-gimp []
+  (.exec (Runtime/getRuntime) (into-array ["gimp" @the-image])))
+
 (defn add-behaviour [f]
   (let [c (select f [:#image])]
        (listen c :mouse-clicked (fn [e] (repaint! c)))
     (listen f :key-pressed (fn [e] (let [key-pressed (.getKeyCode e)] (cond
-                                                                       (= key-pressed (KeyEvent/VK_F)) (display-fullscreen f)
-                                                                       (= key-pressed (KeyEvent/VK_P)) (copy-path-to-clipboard)
-                                                                       (and (= key-pressed (KeyEvent/VK_Q)) (bit-and (.getModifiers e) (KeyEvent/CTRL_MASK))) (System/exit 0)
-                                                                       (or (= key-pressed (KeyEvent/VK_N)) (= key-pressed (KeyEvent/VK_RIGHT)) (= key-pressed (KeyEvent/VK_SPACE))) (do (swap! the-image update-image)(.setTitle f (str "ImgBrowse – " @the-image))))
+             (= key-pressed (KeyEvent/VK_F)) (display-fullscreen f)
+             (= key-pressed (KeyEvent/VK_P)) (copy-path-to-clipboard)
+             (= key-pressed (KeyEvent/VK_G)) (open-gimp)
+             (and (= key-pressed (KeyEvent/VK_Q)) (bit-and (.getModifiers e) (KeyEvent/CTRL_MASK))) (System/exit 0)
+             (or (= key-pressed (KeyEvent/VK_N)) 
+                 (= key-pressed (KeyEvent/VK_RIGHT)) 
+                 (= key-pressed (KeyEvent/VK_SPACE)))
+               (do (swap! the-image update-image)(.setTitle f (str "ImgBrowse – " @the-image))))
                                         (repaint! c)))))
  f)
 
